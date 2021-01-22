@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/Masterminds/semver"
-	"github.com/hashicorp/go-multierror"
+	multierror "github.com/hashicorp/go-multierror"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -126,6 +126,8 @@ func (l DirectoryLister) ListChildDirs(parentDir string, test func(dir string) b
 type ChartUtils struct{}
 
 func (u ChartUtils) LookupChartDir(chartDirs []string, dir string) (string, error) {
+	fmt.Printf("%s\n", "In LookupChartDir")
+	fmt.Printf("chartDirs: \n [%v]\n\n", chartDirs)
 	for _, chartDir := range chartDirs {
 		currentDir := dir
 		for {
@@ -135,11 +137,20 @@ func (u ChartUtils) LookupChartDir(chartDirs []string, dir string) (string, erro
 
 			// check directory has a Chart.yaml and that it is in a
 			// direct subdirectory of a configured charts directory
+			fmt.Printf("[%s] is the file we will be checking to see if it exists\n", chartYaml)
+			fmt.Printf("chartYaml: [%s]\n", chartYaml)
+			fmt.Printf("parent: [%s]\n", parent)
+			fmt.Printf("chartDir: [%s]\n", chartDir)
+			fmt.Printf("currentDir: [%s]\n", currentDir)
 			if FileExists(chartYaml) && (parent == chartDir) {
 				return currentDir, nil
+			} else {
+				fmt.Printf("\n- Condition 1) Does chartYaml exist: \n[%t]\n", FileExists(chartYaml))
+				fmt.Printf("- Condition 2) Parent matches chartDir: \n[%s] != [%s]\n", parent, chartDir)
 			}
 
 			currentDir = filepath.Dir(currentDir)
+
 			relativeDir, _ := filepath.Rel(chartDir, currentDir)
 			joined := filepath.Join(chartDir, relativeDir)
 			if (joined == chartDir) || strings.HasPrefix(relativeDir, "..") {
